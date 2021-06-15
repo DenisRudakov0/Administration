@@ -1,7 +1,7 @@
 from django.db import models
 
 class Client(models.Model):
-    login = models.CharField("Имя продавца", max_length=50)
+    login = models.CharField("Имя продавца", max_length=50, unique=True)
     password = models.CharField("Имя продавца", max_length=50)
     user = models.OneToOneField('User', on_delete = models.CASCADE, null=True)
     shop = models.OneToOneField('Shop', on_delete = models.CASCADE, null=True)

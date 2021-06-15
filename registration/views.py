@@ -8,28 +8,27 @@ from .models import User, Client, Shop
 import datetime
 import ast
 
-def create(request):
+def create(request):  
+
+    data = request.GET['data']
+    data = ast.literal_eval(data)
+
     try:
-        data = request.GET['data']
-        data = ast.literal_eval(data)
-
-        table_client = Client.objects.all()
-        table_user = User.objects.all()
-        table_shop = Shop.objects.all()
-
+        if Client.objects.filter(login = data['login']).exists() == True:
+            return HttpResponse('Пользователь с данным логином уже зарегистрирован')
         if data['role'] == 'user':
-            id_user = create_user(request, data, table_user)
+            id_user = create_user(request, data)
             Client.objects.create(login = data['login'], password = data['password'], user = User.objects.get(pk=id_user))
         elif data['role'] == 'shop':
-            id_shop = create_shop(request, data, table_shop)
+            id_shop = create_shop(request, data)
             Client.objects.create(login = data['login'], password = data['password'], shop = Shop.objects.get(pk=id_shop))
         else:
             return HttpResponse('Упс! Возникла ошибочка при определении роли')
         return HttpResponse('Данные успешно добавлены :)')
-    except:
+    except:      
         return HttpResponse('Упс! Возникла неизвестная ошибочка, попробуйте снова чуть-чуть по-позже')
 
-def create_shop(request, data, table_shop):
+def create_shop(request, data):
     date_registration = data['registration_date'].split('.')
     create_shop = Shop.objects.create(name = data['name'], registration_number = data['registration_number'],
                           registration_date = datetime.date(*[int(i) for i in date_registration[::-1]]),
@@ -38,6 +37,8 @@ def create_shop(request, data, table_shop):
                           email = data['email'], phone = data['phone'])
     return create_shop.id
 
-def create_user(request, data, table_user):
-    create_user = table_user.create(name = data['name'], email = data['email'], phone = data['phone'])
+def create_user(request, data):
+    create_user = User.objects.create(name = data['name'], email = data['email'], phone = data['phone'])
     return create_user.id
+
+
